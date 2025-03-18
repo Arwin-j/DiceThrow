@@ -5,16 +5,18 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsets.Side
 import android.widget.TextView
 import kotlin.random.Random
 
 class DieFragment : Fragment() {
 
     val DIESIDE = "sidenumber"
-
+    val Result = "RESULT"
     lateinit var dieTextView: TextView
 
     var dieSides: Int = 6
+    var currentRoll: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,13 +39,31 @@ class DieFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        throwDie()
-        view.setOnClickListener{
+
+        if(savedInstanceState == null){
             throwDie()
+        }
+        else{
+            currentRoll = savedInstanceState.getInt(Result)
+            dieTextView.text = savedInstanceState.getInt(Result).toString()
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        currentRoll?.let { outState.putInt(Result, it) }
+
+    }
+
     fun throwDie() {
-        dieTextView.text = (Random.nextInt(dieSides)+1).toString()
+        currentRoll = (Random.nextInt(dieSides)+1)
+        dieTextView.text = currentRoll.toString()
+    }
+    companion object{
+        fun newInstance (sides: Int) = DieFragment().apply {
+            arguments = Bundle().apply {
+                putInt(Result, sides)
+            }
+        }
     }
 }
