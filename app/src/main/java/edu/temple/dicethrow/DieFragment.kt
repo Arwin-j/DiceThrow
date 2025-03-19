@@ -18,12 +18,11 @@ class DieFragment : Fragment() {
     var dieSides: Int = 6
     var currentRoll: Int? = null
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            it.getInt(DIESIDE).run {
-                dieSides = this
-            }
+            dieSides = it.getInt(DIESIDE, 6)
         }
     }
 
@@ -31,7 +30,6 @@ class DieFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_die, container, false).apply {
             dieTextView = findViewById(R.id.dieTextView)
         }
@@ -45,7 +43,7 @@ class DieFragment : Fragment() {
         }
         else{
             currentRoll = savedInstanceState.getInt(Result)
-            dieTextView.text = savedInstanceState.getInt(Result).toString()
+            dieTextView.text = currentRoll.toString()
         }
     }
 
@@ -60,9 +58,9 @@ class DieFragment : Fragment() {
         dieTextView.text = currentRoll.toString()
     }
     companion object{
-        fun newInstance (sides: Int) = DieFragment().apply {
+        fun newInstance (sides: Int = 6) = DieFragment().apply {
             arguments = Bundle().apply {
-                putInt(Result, sides)
+                putInt(DIESIDE, sides)
             }
         }
     }
