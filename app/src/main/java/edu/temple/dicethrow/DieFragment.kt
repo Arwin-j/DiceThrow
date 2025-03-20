@@ -7,16 +7,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets.Side
 import android.widget.TextView
+import androidx.lifecycle.ViewModelProvider
+import kotlinx.coroutines.flow.callbackFlow
 import kotlin.random.Random
 
 class DieFragment : Fragment() {
 
     val DIESIDE = "sidenumber"
-    val Result = "RESULT"
+    val PREVIOUS_ROLL = "previous_roll"
     lateinit var dieTextView: TextView
 
     var dieSides: Int = 6
-    var currentRoll: Int? = null
+    var currentRoll: Int = 0
+
+    lateinit var dieViewModel: DieViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,6 +29,8 @@ class DieFragment : Fragment() {
                 dieSides = this
             }
         }
+
+        dieViewModel = ViewModelProvider(requireActivity())[DieViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -40,29 +46,21 @@ class DieFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if(savedInstanceState == null){
-            throwDie()
+        dieViewModel.getCurrentRoll().observe(viewLifecycleOwner){
+            dieTextView.text = it.toString()
         }
-        else{
-            currentRoll = savedInstanceState.getInt(Result)
-            dieTextView.text = savedInstanceState.getInt(Result).toString()
-        }
-    }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        currentRoll?.let { outState.putInt(Result, it) }
-
+        if(dieViewModel.getCurrentRoll().value == null)
+            dieViewModel.rollDie()
     }
 
     fun throwDie() {
-        currentRoll = (Random.nextInt(dieSides)+1)
-        dieTextView.text = currentRoll.toString()
+        dieViewModel.setCurrentRoll(Random.nextInt(dieSides)+1)
     }
     companion object{
-        fun newInstance (sides: Int) = DieFragment().apply {
+        fun newInstance (sides: Int = 6) = DieFragment().apply {
             arguments = Bundle().apply {
-                putInt(Result, sides)
+                putInt(DIESIDE, sides)
             }
         }
     }
